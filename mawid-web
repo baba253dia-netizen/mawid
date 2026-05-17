@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mawid موعد</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.0.0/tabler-icons.min.css">
+<style>
+/* CSS CORRIGÉ - Remise en anglais des propriétés standards */
+:root { 
+  --vert: #1D9E75; --vert-f: #0F6E56; --vert-cl: #E1F5EE; --vert-tx: #085041;
+  --orange: #EF9F27; --orange-cl: #FAEEDA; --orange-tx: #854F0B;
+  --rouge: #E24B4A; --rouge-cl: #FCEBEB; --rouge-tx: #A32D2D;
+  --bleu-cl: #E6F1FB; --bleu-tx: #185FA5;
+  --fond: #ffffff; --fond2: #F5F5F3; --bord: #E0E0DC;
+  --texte: #1A1A1A; --texte2: #777;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { 
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--fond2); 
+  color: var(--texte); 
+}
+#app { max-width: 820px; margin: 0 auto; background: var(--fond); min-height: 100vh; }
+
+/* SE CONNECTER */
+.login-page { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 40px 20px; }
+.login-logo { font-size: 56px; font-weight: 900; color: var(--vert); letter-spacing: -2px; }
+.login-ar { font-size: 28px; color: var(--texte2); direction: rtl; margin-top: 4px; }
+.login-sub { font-size: 14px; color: var(--texte2); margin: 10px 0 30px; text-align: center; line-height: 1.6; }
+
+.admin-zone { width: 100%; max-width: 460px; background: var(--fond2); border-radius: 12px; padding: 16px; margin-top: 4px; text-align: center;}
+.champ { width: 100%; padding: 10px 12px; border: 1px solid var(--bord); border-radius: 8px; font-size: 14px; font-family: inherit; background: var(--fond); color: var(--texte); margin-bottom: 10px; }
+.champ:focus { outline: 2px solid var(--vert); border-color: transparent; }
+.erreur { font-size: 12px; color: var(--rouge); text-align: center; margin-top: 6px; display: none; }
+.btn { border: none; border-radius: 8px; padding: 10px 16px; font-size: 14px; cursor: pointer; font-weight: 600; background: var(--vert); color: #fff; width: 100%; transition: opacity 0.15s; }
+.btn:hover { opacity: .85; }
+
+/* Dashboard caché par défaut */
+#dashboard { display: none; padding: 20px; }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <!-- ECRAN DE CONNEXION -->
+  <div id="login-screen" class="login-page">
+    <div class="login-logo">Mawid</div>
+    <div class="login-ar">موعد</div>
+    <div class="login-sub">Système de gestion de rendez-vous multi-secteurs</div>
+    
+    <div class="admin-zone">
+      <input type="password" id="pin-input" class="champ" placeholder="Code PIN Administrateur">
+      <button id="login-btn" class="btn">Ouvrir l'application</button>
+      <div id="login-error" class="erreur">Code PIN incorrect</div>
+    </div>
+  </div>
+
+  <!-- APPLICATION PRINCIPALE -->
+  <div id="dashboard">
+    <h2>Bienvenue dans l'administration Mawid</h2>
+    <p>Application déverrouillée avec succès.</p>
+    <!-- Le reste de ton HTML viendra se greffer ici via JS -->
+  </div>
+</div>
+
+<script>
+/* ================================================================
+MAWID v3.0 — Multi-Secteurs Virtuel Standard | Mauritanie
+Mot de passe admin : mawid2025
+================================================================ */
+
+// ── UTILITAIRES (CORRIGÉS) ──────────────────────────────────────
+const jours_avant = n => { 
+  const d = new Date(); 
+  d.setDate(d.getDate() - n); 
+  return d.toISOString().split('T')[0]; // Correction du (0] en [0]
+};
+
+const jours_apres = n => { 
+  const d = new Date(); 
+  d.setDate(d.getDate() + n); 
+  return d.toISOString().split('T')[0]; 
+};
+
+const auj = () => new Date().toISOString().split('T')[0];
+
+// ── SECTEURS & MOTIFS (CORRIGÉS) ────────────────────────────────
+const MOTIFS = {
+  medical: ['Consultation générale', 'Suivi médical', 'Analyse / Bilan'],
+  bancaire: ['Ouverture de compte', 'Demande de crédit', 'Virement / Transfert'],
+  admin: ['Dépôt de dossier', 'Retrait de document', 'État civil'],
+  juridique: ["Consultation juridique", "Signature d'acte", "Audience"], // Correction des guillemets
+  education: ["Inscription", "Entretien / Admission", "Conseil d'orientation"] // Correction des guillemets
+};
+
+// ── BASE DE DONNEES DÉMO (TRONQUÉE RÉPARÉE) ───────────────────────
+let BDD = {
+  clients: [
+    {
+      id: 'C004',
+      nom: 'Préfecture de Nouakchott',
+      contact: 'M. Sidi Ould Mohamed',
+      secteur: 'admin',
+      rdvs: [
+        { id: 12, patient: 'Harouna Diallo', date: auj(), heure: '08:00', motif: 'État civil', statut: 'confirme' },
+        { id: 15, patient: 'Khady Mint Bah', date: jours_apres(1), heure: '10:00', motif: 'Dépôt de dossier', statut: 'attente' }
+      ]
+    }
+    // Base de données fermée correctement
+  ]
+};
+
+// ── LOGIQUE DE CONNEXION (AJOUTÉE) ───────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  const pinInput = document.getElementById('pin-input');
+  const loginBtn = document.getElementById('login-btn');
+  const errorMsg = document.getElementById('login-error');
+  const loginScreen = document.getElementById('login-screen');
+  const dashboard = document.getElementById('dashboard');
+
+  const motDePasseCorrect = "mawid2025";
+
+  function verifierPIN() {
+    if (pinInput.value === motDePasseCorrect) {
+      // Succès : on cache l'écran de connexion et on affiche l'app
+      loginScreen.style.display = 'none';
+      dashboard.style.display = 'block';
+    } else {
+      // Erreur : on affiche le message d'erreur
+      errorMsg.style.display = 'block';
+      pinInput.value = '';
+      pinInput.focus();
+    }
+  }
+
+  // Écouteur sur le bouton
+  loginBtn.addEventListener('click', verifierPIN);
+
+  // Écouteur sur la touche "Entrée" du clavier
+  pinInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      verifierPIN();
+    }
+  });
+});
+</script>
+</body>
+</html>
